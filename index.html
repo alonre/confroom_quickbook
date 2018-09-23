@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Conference Room QuickBook</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" sizes="192x192" href="images/android-desktop.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+    <link rel="apple-touch-icon-precomposed" href="images/ios-desktop.png">
+
+    <!-- Tile icon for Win8 (144x144 + tile color) -->
+    <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileColor" content="#3372DF">
+
+    <link rel="shortcut icon" href="images/favicon.png">
+
+    <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
+    <!--
+    <link rel="canonical" href="http://www.example.com/">
+    -->
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="styles.css">
+    <!-- <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.light_blue-red.min.css" /> -->
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  </head>
+  <body class="mdl-demo mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header mdl-layout__header--scroll mdl-color--primary">
+        <div class="mdl-layout--large-screen-only mdl-layout__header-row">
+        </div>
+        <div class="mdl-layout--large-screen-only mdl-layout__header-row">
+          <h3>Conference Room QuickBook</h3>
+        </div>
+        <div class="mdl-layout--large-screen-only mdl-layout__header-row">
+        </div>
+        <div class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
+          <a id="myRoomsTabHeader" href="#myrooms" class="mdl-layout__tab is-active">My Rooms</a>
+          <a id="availableRoomsTabHeader" href="#availablerooms" class="mdl-layout__tab">Available Rooms</a>
+          <a id="accountTabHeader" href="#account" class="mdl-layout__tab">Account</a>
+        </div>
+      </header>
+      <main class="mdl-layout__content">
+        <div class="mdl-layout__tab-panel is_active" id="myrooms">
+          <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+            <div class="mdl-card mdl-cell mdl-cell--12-col">
+              <div id="myrooms_content" style="display: none;" class="mdl-card__supporting-text">
+                <table class="mdl-data-table mdl-js-data-table">
+                  <thead>
+                    <tr>
+                      <th class="mdl-data-table__cell--non-numeric">My Rooms</th>
+                      <th class="mdl-data-table__cell--non-numeric"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="myrooms_tbody">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>    
+        <div class="mdl-layout__tab-panel" id="availablerooms">
+          <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+            <div class="mdl-card mdl-cell mdl-cell--12-col">
+              <div id="content" style="display: none;" class="mdl-card__supporting-text">
+                <table class="mdl-data-table mdl-js-data-table">
+                  <thead>
+                    <tr>
+                      <th class="mdl-data-table__cell--non-numeric">Available Rooms</th>
+                      <th class="mdl-data-table__cell--non-numeric"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="table_body">
+                  </tbody>
+                </table>
+              </div>
+              <!-- Event card -->
+              <div id="book_notice" class="mdl-card__supporting-text" style="display: none;"/> 
+              <!-- MDL Spinner Component -->
+              <div id="busy_spinner" style="display: none;" class="mdl-spinner mdl-js-spinner is-active"></div>
+            </div>
+          </section>
+        </div>    
+        <div class="mdl-layout__tab-panel" id="account">
+          <section class="section--center mdl-grid mdl-grid--no-spacing">
+            <div class="mdl-cell mdl-cell--12-col">
+              <h4 class="mdl-cell mdl-cell--12-col">Account</h4>
+                <div>
+                  <!--Add buttons to initiate auth sequence and sign out-->
+                  <button id="authorize_button" style="display: none;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">Authorize</button>
+                  <button id="signout_button" style="display: none;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Sign Out</button>
+                </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    
+    
+    
+
+    <script type="text/javascript">
+      // Client ID and API key from the Developer Console
+      var CLIENT_ID = '<YOUR_CLIENT_ID';
+      var API_KEY = '<YOUR_API_KEY>';
+
+      // Array of API discovery doc URLs for APIs used by the quickstart
+      var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest", "https://www.googleapis.com/discovery/v1/apis/admin/directory_v1/rest"];
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      var SCOPES = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly";
+
+      var authorizeButton = document.getElementById('authorize_button');
+      var signoutButton = document.getElementById('signout_button');
+      var busySpinner = document.getElementById('busy_spinner');
+      var contentDiv = document.getElementById('content');
+      var bookNoticeDiv = document.getElementById('book_notice');
+
+      // All rooms in the org
+      var rooms = [];
+      var busyRooms = {};
+      var id_to_name = {};
+      var myRooms = {};
+
+      /**
+       *  On load, called to load the auth2 library and API client library.
+       */
+      function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+      }
+
+      /**
+       *  Initializes the API client library and sets up sign-in state
+       *  listeners.
+       */
+      function initClient() {
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES
+        }).then(function () {
+          // Listen for sign-in state changes.
+          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+
+          // Handle the initial sign-in state.
+          updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+          authorizeButton.onclick = handleAuthClick;
+          signoutButton.onclick = handleSignoutClick;
+        });
+      }
+
+      /**
+       *  Called when the signed in status changes, to update the UI
+       *  appropriately. After a sign-in, the API is called.
+       */
+      function updateSigninStatus(isSignedIn) {
+        if (isSignedIn) {
+          document.getElementById("myRoomsTabHeader").click();
+          authorizeButton.style.display = 'none';
+          signoutButton.style.display = 'block';
+          //listUpcomingEvents();
+          fetchAllRooms();
+        } else {
+          document.getElementById("accountTabHeader").click();
+          authorizeButton.style.display = 'block';
+          signoutButton.style.display = 'none';
+        }
+      }
+
+      function setIsBusy(isBusy) {
+        if (isBusy) {
+          contentDiv.style.display = 'none';
+          busySpinner.style.display = 'block';
+        }
+        else {
+          contentDiv.style.display = 'block';
+          busySpinner.style.display = 'none';
+        }
+      }
+
+      /**
+       *  Sign in the user upon button click.
+       */
+      function handleAuthClick(event) {
+        gapi.auth2.getAuthInstance().signIn();
+      }
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick(event) {
+        gapi.auth2.getAuthInstance().signOut();
+      }
+
+      function renderMyRooms() {
+        if (Object.keys(myRooms).length < 1) {
+          document.getElementById("availableRoomsTabHeader").click();
+          return;
+        }
+        Object.keys(myRooms).forEach(function(resourceEmail) {
+          var row = document.createElement("tr");
+        
+          var textCell = document.createElement("td");
+          var textContent = document.createTextNode(id_to_name[resourceEmail]);
+          textCell.appendChild(textContent);
+          row.appendChild(textCell);
+
+          //Create an input type dynamically.   
+          var button = document.createElement("button");
+          //Assign different attributes to the element. 
+          button.className = "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored";
+          button.onclick = function() { // Note this is a function
+            releaseRoom(resourceEmail);
+          };
+          var textNode = document.createTextNode("Release");
+          button.appendChild(textNode);
+          componentHandler.upgradeElement(button);
+          var buttonCell = document.createElement("td");
+          buttonCell.appendChild(button);
+          row.appendChild(buttonCell);
+
+          var tableBody = document.getElementById("myrooms_tbody");
+          tableBody.appendChild(row);
+        });
+
+        var myrooms_content = document.getElementById("myrooms_content");
+        myrooms_content.style.display = 'block';
+      }
+
+      function appendRoomOption(resourceName, resourceEmail) {
+        var row = document.createElement("tr");
+        
+        var textCell = document.createElement("td");
+        var textContent = document.createTextNode(resourceName);
+        textCell.appendChild(textContent);
+        row.appendChild(textCell);
+
+        //Create an input type dynamically.   
+        var button = document.createElement("button");
+        //Assign different attributes to the element. 
+        button.className = "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored";
+        button.onclick = function() { // Note this is a function
+          quickBook(resourceEmail);
+        };
+        var textNode = document.createTextNode("Book");
+        button.appendChild(textNode);
+        componentHandler.upgradeElement(button);
+        var buttonCell = document.createElement("td");
+        buttonCell.appendChild(button);
+        row.appendChild(buttonCell);
+
+        var tableBody = document.getElementById("table_body");
+        tableBody.appendChild(row);
+      }
+
+      function bookComplete(event) {
+        contentDiv.style.display = 'none';
+        bookNoticeDiv.style.display = 'block';
+
+        var h4 = document.createElement('h4');
+        var textNode = document.createTextNode('Event created');
+        h4.appendChild(textNode);
+        bookNoticeDiv.appendChild(h4);
+
+        var a = document.createElement('a');
+        a.href = event.htmlLink;
+        var urlNode = document.createTextNode(event.htmlLink);
+        a.appendChild(urlNode);
+        bookNoticeDiv.appendChild(a);
+      }
+
+      function bookingError(message) {
+        contentDiv.style.display = 'none';
+        bookNoticeDiv.style.display = 'block';
+
+        var h4 = document.createElement('h4');
+        var textNode = document.createTextNode(message);
+        h4.appendChild(textNode);
+        bookNoticeDiv.appendChild(h4);
+      }
+
+      function quickBook(resourceEmail) {
+        var start = new Date(), end = new Date();
+        end.setMinutes(end.getMinutes()+30);
+        var event = {
+          'summary': 'QuickBook',
+          'start': {
+            'dateTime': start.toISOString(),
+            'timeZone': 'America/Los_Angeles'
+          },
+          'end': {
+            'dateTime': end.toISOString(),
+            'timeZone': 'America/Los_Angeles'
+          },
+          'attendees': [
+            {'email': resourceEmail}
+          ]
+        };
+
+        var request = gapi.client.calendar.events.insert({
+          'calendarId': 'primary',
+          'resource': event
+        });
+
+        setIsBusy(true);
+        request.execute(function(event) {
+          setIsBusy(false);
+          document.location.reload(true);
+          // bookComplete(event);
+        });
+      }
+      /**
+       * Print the summary and start datetime/date of the next ten events in
+       * the authorized user's calendar. If no events are found an
+       * appropriate message is printed.
+       */
+      function listUpcomingEvents(timeMin, timeMax) {
+        gapi.client.calendar.events.list({
+          'calendarId': 'primary',
+          'timeMin': timeMin,
+          'timeMax': timeMax,
+          'showDeleted': false,
+          'singleEvents': true,
+          'maxResults': 10,
+        }).then(function(response) {
+          var events = response.result.items;
+          events.forEach(function(event) {
+            var attendees = event['attendees'];
+            if (!attendees) return;
+            attendees.forEach(function(attendee) {
+              console.log(attendee);
+              var email = attendee['email'];
+              if (Object.keys(busyRooms).indexOf(email) > -1) {
+                var index = attendees.indexOf(attendee);
+                attendees.splice(index, 1);
+                event['attendees'] = attendees;
+                myRooms[email] = event;
+                console.log(attendees);
+              }
+            });
+          });
+          renderMyRooms();
+        });
+      }
+
+      function listAvailableRooms() {
+        var now = new Date(), later = new Date();
+        later.setHours(now.getHours()+1);
+        var items = [];
+        for (i = 0; i < rooms.length; i++) {
+          var resource = rooms[i];
+          items.push({"id": resource.resourceEmail});
+          id_to_name[resource.resourceEmail] = resource.resourceName;
+        } 
+        gapi.client.calendar.freebusy.query({
+          'items': items,
+          'timeMin': now.toISOString(),
+          'timeMax': later.toISOString()
+        }).then(function(response) {
+          var calendars = response.result.calendars;
+
+          if (calendars && Object.keys(calendars).length > 0) {
+            for (i = 0; i < Object.keys(calendars).length; i++) {
+              var cal = Object.keys(calendars)[i];
+              var busy = calendars[cal]['busy']
+              if (busy.length == 0) {
+                appendRoomOption(id_to_name[cal], cal);
+              }
+              else {
+                busyRooms[cal] = busy;
+              }
+            }
+            checkBusyRooms();
+            setIsBusy(false);
+          } else {
+            bookingError('No calendars found.');
+          }
+        });
+      }
+
+      function fetchAllRooms() {
+        setIsBusy(true);
+        gapi.client.directory.resources.calendars.list({
+          'customer': 'my_customer',
+          'maxResults': 10,
+          // Optional: filter resources by `buildingId`
+          // 'query': 'buildingId = Singular'
+        }).then(function(response) {
+          Array.prototype.push.apply(rooms, response.result.items);
+          if (rooms && rooms.length > 0) {
+            listAvailableRooms();
+          } else {
+            bookingError('No resources found.');
+          }
+        });
+      }
+
+      function checkBusyRooms() {
+        var minTime = new Date();
+        var maxTime = new Date();
+
+        for (resourceEmail in busyRooms) {
+          busy = busyRooms[resourceEmail];
+          busy.forEach(function(timeframe) {
+            var start = new Date(timeframe['start']);
+            var end = new Date(timeframe['end']);
+            
+            if (start < minTime) {
+              minTime = start;
+            }
+
+            if (end.getTime() > maxTime.getTime()) {
+              maxTime = end;
+            }
+          });
+        }
+        listUpcomingEvents(minTime.toISOString(), maxTime.toISOString());
+      }
+
+      function releaseRoom(resourceEmail) {
+        console.log(resourceEmail);
+        var cur_event = myRooms[resourceEmail];
+        console.log(cur_event);
+        var event = {
+          'attendees': cur_event['attendees']
+        };
+
+        var request = gapi.client.calendar.events.patch({
+          'calendarId': 'primary',
+          'eventId': cur_event['id'],
+          'resource': event
+        });
+
+        setIsBusy(true);
+        request.execute(function(event) {
+          setIsBusy(false);
+          document.location.reload(true);
+          // bookComplete(event);
+        });
+
+      }
+
+    </script>
+
+    <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>
+  </body>
+</html>
